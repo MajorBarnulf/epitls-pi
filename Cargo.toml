@@ -1,0 +1,16 @@
+[package]
+name = "epitls-pi"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "pi"
+path = "src/main.rs"
+
+[dependencies]
+chrono = "0.4.22"
+clap = { version = "3.2.22", features = ["clap_derive", "derive"] }
+glob = "0.3.0"
+notify = "5.0.0"
+notify-debouncer-mini = "0.2.1"
+termion = "1.5.6"
