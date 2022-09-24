@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 
 pub mod check;
+pub mod config;
 pub mod run;
 pub mod tasks;
 pub mod test;
