@@ -2,10 +2,12 @@ use std::{
     fs,
     path::PathBuf,
     process::{Command, ExitStatus},
+    thread,
+    time::Duration,
 };
 
 use crate::utils::{
-    log_command_run, log_separator, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
+    log_command_run, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
 };
 
 pub struct CompileTask {
@@ -62,6 +64,7 @@ impl CompileTask {
         log_separator_top();
         let status = command.status().unwrap();
         log_separator_bottom();
+        thread::sleep(Duration::from_millis(100));
         status.success().then_some(output_path).ok_or(status)
     }
 }
@@ -86,5 +89,21 @@ impl RunTask {
         } else {
             Err(status)
         }
+    }
+}
+
+pub struct GenTask {
+    content: String,
+}
+
+impl GenTask {
+    pub fn new(content: String) -> Self {
+        Self { content }
+    }
+    pub fn run(self) -> PathBuf {
+        let output_path = tmp_file_path().apply(|o| o.set_extension("c"));
+        fs::write(&output_path, &self.content).unwrap();
+        dbg!(fs::read_to_string(&output_path).unwrap());
+        output_path
     }
 }

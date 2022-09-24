@@ -1,4 +1,5 @@
 use clap::{Parser, Subcommand};
+use config::Config;
 
 pub mod check;
 pub mod config;
@@ -14,8 +15,6 @@ pub struct Arguments {
     command: Commands,
 }
 
-// TODO: turn files into file lists
-
 #[allow(non_camel_case_types)]
 #[derive(Subcommand)]
 pub enum Commands {
@@ -25,7 +24,7 @@ pub enum Commands {
         files: Vec<String>,
     },
 
-    /// Runs a file
+    /// Runs a set of files or the default target.
     run {
         /// Files to run.
         files: Vec<String>,
@@ -33,15 +32,16 @@ pub enum Commands {
 
     /// Runs tests contained within a particular test file or
     test {
-        /// W.I.P. Wether to capture standard output or not.
+        /// Wether to capture standard output or not.
         #[clap(short, long)]
         capture: bool,
 
         /// Files to run tests from.
         files: Vec<String>,
 
-        /// Specific test to run.
-        test: Option<String>,
+        /// Specific tests to run.
+        #[clap(short, long)]
+        tests: Vec<String>,
     },
 
     /// Watches changes to source files and re run them
@@ -49,6 +49,18 @@ pub enum Commands {
         /// Files to run.
         files: Vec<String>,
     },
+
+    ///
+    init { path: String },
+}
+
+fn append_includes(list: &mut Vec<String>) {
+    list.extend(
+        Config::get_current()
+            .includes()
+            .iter()
+            .map(|f| f.to_string()),
+    );
 }
 
 fn main() {
@@ -56,14 +68,23 @@ fn main() {
 
     match args.command {
         Commands::check { files } => check::main(files),
-        Commands::run { files } => {
+        Commands::run { mut files } => {
+            append_includes(&mut files);
             run::main(files);
         }
         Commands::test {
             capture,
-            files,
-            test,
-        } => test::main(capture, files, test),
-        Commands::watch { files } => watch::main(files),
+            mut files,
+            tests,
+        } => {
+            append_includes(&mut files);
+            let tests = (!tests.is_empty()).then_some(tests);
+            test::main(capture, files, tests)
+        }
+        Commands::watch { mut files } => {
+            append_includes(&mut files);
+            watch::main(files)
+        }
+        Commands::init { path } => config::create(path),
     }
 }
