@@ -1,3 +1,3 @@
-pub fn main(_file: String) {
+pub fn main(_files: Vec<String>) {
     todo!()
 }

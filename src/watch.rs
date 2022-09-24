@@ -1,6 +1,5 @@
 use std::{path::Path, sync::mpsc, time::Duration};
 
-use notify::{Error, Event, Watcher};
 use notify_debouncer_mini::new_debouncer;
 
 use crate::{
@@ -9,16 +8,16 @@ use crate::{
 };
 
 pub struct Repeater {
-    file: String,
+    files: Vec<String>,
 }
 
 impl Repeater {
-    pub fn new(file: String) -> Self {
-        Self { file }
+    pub fn new(files: Vec<String>) -> Self {
+        Self { files }
     }
 
     pub fn repeat(&self) -> Option<()> {
-        let source = CompileTask::new(self.file.clone().into())
+        let binary = CompileTask::new(self.files.clone().into_iter().map(|f| f.into()).collect())
             .run()
             .map(Option::from)
             .unwrap_or_else(|_| {
@@ -27,7 +26,7 @@ impl Repeater {
             })?;
 
         log_success("compilation successful");
-        RunTask::new(source)
+        RunTask::new(binary)
             .run()
             .map(Option::from)
             .unwrap_or_else(|_| {
@@ -41,18 +40,20 @@ impl Repeater {
     }
 }
 
-pub fn main(file: String) {
-    log_process(&format!("watching file '{file}'"));
-    let repeater = Repeater::new(file.clone());
+pub fn main(files: Vec<String>) {
+    log_process(&format!("watching files '{files:?}'"));
+    let repeater = Repeater::new(files.clone());
     repeater.repeat();
 
     let (send, rec) = mpsc::channel();
     let mut debouncer = new_debouncer(Duration::from_millis(100), None, send).unwrap();
 
-    debouncer
-        .watcher()
-        .watch(Path::new(&file), notify::RecursiveMode::Recursive)
-        .unwrap();
+    for file in files {
+        debouncer
+            .watcher()
+            .watch(Path::new(&file), notify::RecursiveMode::Recursive)
+            .unwrap();
+    }
 
     for events in rec {
         for _ in events.unwrap() {

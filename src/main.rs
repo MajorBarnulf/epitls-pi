@@ -22,16 +22,13 @@ pub enum Commands {
     /// Checks a source file for conformance with piscine limitations.
     check {
         /// File to check.
-        /// Supports globing
-        #[clap(default_value_t = String::from("*"))]
-        file: String,
+        files: Vec<String>,
     },
 
     /// Runs a file
     run {
-        /// File to run.
-        #[clap(default_value_t = String::from("./main.c"))]
-        file: String,
+        /// Files to run.
+        files: Vec<String>,
     },
 
     /// Runs tests contained within a particular test file or
@@ -40,9 +37,8 @@ pub enum Commands {
         #[clap(short, long)]
         capture: bool,
 
-        /// File to run tests from.
-        #[clap(default_value_t = String::from("./test.c"))]
-        file: String,
+        /// Files to run tests from.
+        files: Vec<String>,
 
         /// Specific test to run.
         test: Option<String>,
@@ -50,9 +46,8 @@ pub enum Commands {
 
     /// Watches changes to source files and re run them
     watch {
-        /// File to run.
-        #[clap(default_value_t = String::from("./main.c"))]
-        file: String,
+        /// Files to run.
+        files: Vec<String>,
     },
 }
 
@@ -60,15 +55,15 @@ fn main() {
     let args: Arguments = Parser::parse();
 
     match args.command {
-        Commands::check { file } => check::main(file),
-        Commands::run { file } => {
-            run::main(file);
+        Commands::check { files } => check::main(files),
+        Commands::run { files } => {
+            run::main(files);
         }
         Commands::test {
             capture,
-            file,
+            files,
             test,
-        } => test::main(capture, file, test),
-        Commands::watch { file } => watch::main(file),
+        } => test::main(capture, files, test),
+        Commands::watch { files } => watch::main(files),
     }
 }

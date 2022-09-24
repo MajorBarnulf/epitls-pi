@@ -4,10 +4,12 @@ use std::{
     process::{Command, ExitStatus},
 };
 
-use crate::utils::{log_command_run, log_separator, tmp_file_path, Apply};
+use crate::utils::{
+    log_command_run, log_separator, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
+};
 
 pub struct CompileTask {
-    file: PathBuf,
+    files: Vec<PathBuf>,
     addition: Vec<String>,
     flags: Vec<String>,
 }
@@ -15,9 +17,9 @@ pub struct CompileTask {
 // TODO: split compile & compile raw
 
 impl CompileTask {
-    pub fn new(file: PathBuf) -> Self {
+    pub fn new(files: Vec<PathBuf>) -> Self {
         Self {
-            file,
+            files,
             addition: vec![],
             flags: vec![],
         }
@@ -35,7 +37,8 @@ impl CompileTask {
 
     pub fn run(self) -> Result<PathBuf, ExitStatus> {
         let proc_source = self.gen_source();
-        let sources = vec![proc_source, self.file.clone()];
+        let mut sources = self.files.clone();
+        sources.push(proc_source);
         self.compile(sources)
     }
 
@@ -56,9 +59,9 @@ impl CompileTask {
             .args(self.flags.clone())
             .args(sources.iter().map(|s| s.to_str().unwrap()));
         log_command_run(&command);
-        log_separator();
+        log_separator_top();
         let status = command.status().unwrap();
-        log_separator();
+        log_separator_bottom();
         status.success().then_some(output_path).ok_or(status)
     }
 }
@@ -75,9 +78,9 @@ impl RunTask {
     pub fn run(self) -> Result<(), ExitStatus> {
         let mut command = Command::new(self.file);
         log_command_run(&command);
-        log_separator();
+        log_separator_top();
         let status = command.status().unwrap();
-        log_separator();
+        log_separator_bottom();
         if status.success() {
             Ok(())
         } else {

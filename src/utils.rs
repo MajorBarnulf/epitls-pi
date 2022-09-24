@@ -42,6 +42,14 @@ pub fn log_separator() {
     println!("────────────────")
 }
 
+pub fn log_separator_top() {
+    println!("───────────────┐")
+}
+
+pub fn log_separator_bottom() {
+    println!("───────────────┘")
+}
+
 pub fn log_failure(text: &str) {
     log_pi_prefix();
     let text = format!("{}{text}{}", color::Fg(color::Red), color::Fg(color::Reset));

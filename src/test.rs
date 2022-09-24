@@ -1,4 +1,4 @@
-pub fn main(_capture: bool, _file: String, _test: Option<String>) {
+pub fn main(_capture: bool, _files: Vec<String>, _test: Option<String>) {
     let content = todo!();
     let tests = find_tests(content);
     for test in tests {

@@ -3,8 +3,8 @@ use crate::{
     utils::{log_failure, log_success},
 };
 
-pub fn main(file: String) -> Option<()> {
-    let source_file = file.into();
+pub fn main(files: Vec<String>) -> Option<()> {
+    let source_file = files.into_iter().map(|f| f.into()).collect();
     let compiled = CompileTask::new(source_file)
         .with_flag("-Wall")
         .with_flag("-Wextra")
