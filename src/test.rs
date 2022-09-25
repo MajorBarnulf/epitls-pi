@@ -6,7 +6,7 @@ use crate::{
 };
 
 pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>, _test: Option<Vec<String>>) {
-	log_process("running tests");
+	log_process("testing");
 	for path in files {
 		let content = fs::read_to_string(&path).unwrap();
 		let tests = find_tests(content);

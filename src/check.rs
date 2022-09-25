@@ -7,6 +7,7 @@ use crate::{
 	utils::{log_failure, log_process},
 };
 
+/// TODO: fill with appropriate rules
 const FORMAT_CONFIG: &str = r#"{BasedOnStyle: llvm}"#;
 
 mod testables;

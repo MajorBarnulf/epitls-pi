@@ -2,7 +2,8 @@
 
 int main() {
 	int a;
-	printf("hello, world!! %d\n", a);
+	printf("hello, world!\n");
+	printf("a: %d\n", a);
 }
 
 

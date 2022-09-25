@@ -166,6 +166,7 @@ impl CmdTask {
 		Command::new("sh")
 			.arg("-c")
 			.arg(self.command)
+			.stderr(Stdio::inherit())
 			.stdout(Stdio::inherit())
 			.output()
 			.map(|_| ())
