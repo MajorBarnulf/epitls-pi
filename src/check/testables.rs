@@ -1,5 +1,3 @@
-use crate::utils::log_failure;
-
 fn ends_with_newline(source: String) -> Result<(), String> {
 	if !source.ends_with('\n') {
 		Err("source does not end with newline".into())
@@ -14,10 +12,7 @@ pub struct Rule {
 }
 
 impl Rule {
-	pub fn new<'a>(
-		name: impl ToString,
-		test: impl 'static + Fn(String) -> Result<(), String>,
-	) -> Self {
+	pub fn new(name: impl ToString, test: impl 'static + Fn(String) -> Result<(), String>) -> Self {
 		let name = name.to_string();
 		let test = Box::new(test);
 		Self { name, test }

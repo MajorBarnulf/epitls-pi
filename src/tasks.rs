@@ -161,6 +161,7 @@ impl CmdTask {
 		Self { command }
 	}
 
+	#[allow(clippy::result_unit_err)]
 	pub fn run(self) -> Result<(), ()> {
 		Command::new("sh")
 			.arg("-c")
