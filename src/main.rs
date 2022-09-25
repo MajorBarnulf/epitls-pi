@@ -120,18 +120,18 @@ fn main() {
 			append_includes(&mut files);
 			let args = compilation_args();
 			let tests = (!tests.is_empty()).then_some(tests);
-			test::main(capture, files, tests)
+			test::main(capture, files, args, tests)
 		}
 		Commands::watch {
 			command: WatchSubcommand::run { mut files },
 		} => {
 			append_includes(&mut files);
 			let args = compilation_args();
-			let files = files.clone();
-			watch::main(files, move || {
+			watch::main(files.clone(), move || {
 				run::main(files.clone(), args.clone());
 			})
 		}
+
 		Commands::watch {
 			command: WatchSubcommand::test {
 				mut files,
@@ -141,8 +141,9 @@ fn main() {
 		} => {
 			append_includes(&mut files);
 			let args = compilation_args();
-			watch::main(files, move || {
-				run::main(files.clone(), args.clone());
+			let tests = (!tests.is_empty()).then_some(tests);
+			watch::main(files.clone(), move || {
+				test::main(capture, files.clone(), args.clone(), tests.clone());
 			})
 		}
 

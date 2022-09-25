@@ -1,7 +1,7 @@
 use std::{
 	fs,
 	path::PathBuf,
-	process::{Command, ExitStatus},
+	process::{Command, ExitStatus, Stdio},
 };
 
 use crate::utils::{
@@ -14,8 +14,6 @@ pub struct CompileTask {
 	flags: Vec<String>,
 	verbose: bool,
 }
-
-// TODO: split compile & compile raw
 
 impl CompileTask {
 	pub fn new(files: Vec<PathBuf>) -> Self {
@@ -51,7 +49,6 @@ impl CompileTask {
 
 	pub fn gen_source(&self) -> PathBuf {
 		let mut output_path = tmp_file_path();
-		// TODO: make use of supplement
 		output_path.set_extension("c");
 		fs::write(&output_path, "").unwrap();
 		output_path
@@ -124,8 +121,33 @@ impl GenTask {
 
 	pub fn run(self) -> PathBuf {
 		let output_path = tmp_file_path().apply(|o| o.set_extension("c"));
-		let content = self.content.clone();
+		let content = self.content;
 		fs::write(&output_path, &content).unwrap();
 		output_path
+	}
+}
+
+pub struct FormatTask {
+	file: String,
+	config: String,
+}
+
+impl FormatTask {
+	pub fn new(file: String, config: String) -> Self {
+		Self { config, file }
+	}
+
+	pub fn run(self) -> String {
+		let config = self.config;
+		let mut command = Command::new("clang-format");
+		command
+			.arg(self.file)
+			.arg(format!("-style={config}"))
+			.stdout(Stdio::null())
+			.stderr(Stdio::null());
+		command.status().unwrap();
+
+		let result = command.output().unwrap().stdout;
+		String::from_utf8(result).unwrap()
 	}
 }

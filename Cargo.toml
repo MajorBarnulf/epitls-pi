@@ -10,6 +10,7 @@ path = "src/main.rs"
 [dependencies]
 chrono = "0.4.22"
 clap = { version = "3.2.22", features = ["clap_derive", "derive"] }
+diff = "0.1.13"
 glob = "0.3.0"
 notify = "5.0.0"
 notify-debouncer-mini = "0.2.1"

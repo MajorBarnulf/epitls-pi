@@ -5,7 +5,7 @@ use crate::{
 	utils::{log_failure, log_process},
 };
 
-pub fn main(_capture: bool, files: Vec<String>, _test: Option<Vec<String>>) {
+pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>, _test: Option<Vec<String>>) {
 	// let includes = files
 	//     .iter()
 	//     .cloned()
@@ -23,10 +23,14 @@ pub fn main(_capture: bool, files: Vec<String>, _test: Option<Vec<String>>) {
 			thread::sleep(Duration::from_millis(100));
 
 			// compile with all files
-			//let files = includes.clone().apply(|v| v.insert(0, generated_code));
-			let generated_bin = CompileTask::new(vec![generated_code]).run().unwrap();
+			let mut task = CompileTask::new(vec![generated_code]);
+			for flag in args.clone() {
+				task = task.with_flag(flag);
+			}
+			let generated_bin = task.run().unwrap();
+
 			// run
-			if let Err(_) = RunTask::new(generated_bin).run() {
+			if RunTask::new(generated_bin).run().is_err() {
 				log_failure("test failed");
 			}
 		}
@@ -44,16 +48,16 @@ pub fn find_tests(source: String) -> Vec<String> {
 pub fn gen_test_main(path: &str, test: &str) -> String {
 	format!(
 		"
-void ____test();
+void __pi_test();
 
 int main(int _argc, char** _argv) {{
-    ____test();
+    __pi_test();
     return 0;
 }}
 
 #include \"{path}\"
 
-void ____test() {{
+void __pi_test() {{
     {test}();
 }}
 "

@@ -2,10 +2,7 @@ use std::{path::Path, sync::mpsc, time::Duration};
 
 use notify_debouncer_mini::new_debouncer;
 
-use crate::{
-	tasks::{CompileTask, RunTask},
-	utils::{log_failure, log_process, log_success},
-};
+use crate::utils::log_process;
 
 pub struct Repeater {
 	op: Box<dyn Fn()>,
@@ -40,7 +37,7 @@ pub fn main(files: Vec<String>, op: impl Fn() + 'static) {
 	}
 
 	for events in rec {
-		for _ in events.unwrap() {
+		for _event in events.unwrap() {
 			repeater.repeat();
 		}
 	}
