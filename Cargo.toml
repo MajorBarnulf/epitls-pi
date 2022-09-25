@@ -1,10 +1,11 @@
 [package]
 name = "epitls-pi"
-version = "1.0.0"
+version = "1.1.0"
 edition = "2021"
 license = "GPL-3.0+"
 description = "A little helper tool meant to ease the developpment of the C piscine at EPITA/Toulouse."
 repository = "https://github.com/MajorBarnulf/epitls-pi"
+keywords = ["pi", "epita", "tls", "piscine"]
 authors = ["JOLIMAITRE Matthieu <matthieu@imagevo.fr>"]
 
 [[bin]]
