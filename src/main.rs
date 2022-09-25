@@ -58,8 +58,11 @@ pub enum Commands {
 		command: String,
 	},
 
-	///
+	/// Initializes a project directory configuration, useful for custom flags, includes and custop push messages
 	init { path: String },
+
+	/// Pushes changes to the git server with a custom tag.
+	push,
 }
 
 fn append_includes(list: &mut Vec<String>) {
@@ -120,5 +123,9 @@ fn main() {
 		}
 
 		Commands::init { path } => config::create(path),
+
+		Commands::push => {
+			todo!();
+		}
 	}
 }

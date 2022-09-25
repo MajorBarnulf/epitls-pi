@@ -6,7 +6,7 @@ use std::{
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::Apply;
+use crate::utils::{log_success, Apply};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -82,5 +82,11 @@ pub fn create(path: String) {
 	}
 	let name = absolute.file_name().unwrap();
 	let config = Config::new(name.to_str().unwrap().to_string());
-	config.write(absolute);
+	config.write(absolute.clone());
+	let path = absolute
+		.apply(|p| p.push(Config::CONFIG_FILE_NAME))
+		.to_str()
+		.unwrap()
+		.to_string();
+	log_success(&format!("created '{path}'"));
 }
