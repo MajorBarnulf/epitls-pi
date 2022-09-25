@@ -30,7 +30,7 @@ pub enum Commands {
 		files: Vec<String>,
 	},
 
-	/// Runs tests contained within a particular test file or
+	/// Runs tests contained within a particular test file or the default test file
 	test {
 		/// Wether to capture standard output or not.
 		#[clap(short, long)]
@@ -44,38 +44,16 @@ pub enum Commands {
 		tests: Vec<String>,
 	},
 
-	/// Watches changes to source files and re run them
+	/// Watches changes to the project included files and runs a command on changes
 	watch {
-		#[clap(subcommand)]
-		command: WatchSubcommand,
+		#[clap(short)]
+		files: Option<Vec<String>>,
+		/// command to run on changes (ex: "pi test")
+		command: String,
 	},
 
 	///
 	init { path: String },
-}
-
-#[allow(non_camel_case_types)]
-#[derive(Subcommand)]
-pub enum WatchSubcommand {
-	/// Runs a set of files or the default target.
-	run {
-		/// Files to run.
-		files: Vec<String>,
-	},
-
-	/// Runs tests contained within a particular test file or
-	test {
-		/// Wether to capture standard output or not.
-		#[clap(short, long)]
-		capture: bool,
-
-		/// Files to run tests from.
-		files: Vec<String>,
-
-		/// Specific tests to run.
-		#[clap(short, long)]
-		tests: Vec<String>,
-	},
 }
 
 fn append_includes(list: &mut Vec<String>) {
@@ -117,34 +95,18 @@ fn main() {
 			mut files,
 			tests,
 		} => {
+			if files.is_empty() {
+				files.push(Config::get_current().test_file().to_string());
+			}
 			append_includes(&mut files);
 			let args = compilation_args();
 			let tests = (!tests.is_empty()).then_some(tests);
 			test::main(capture, files, args, tests)
 		}
-		Commands::watch {
-			command: WatchSubcommand::run { mut files },
-		} => {
+		Commands::watch { command, files } => {
+			let mut files = files.unwrap_or_default();
 			append_includes(&mut files);
-			let args = compilation_args();
-			watch::main(files.clone(), move || {
-				run::main(files.clone(), args.clone());
-			})
-		}
-
-		Commands::watch {
-			command: WatchSubcommand::test {
-				mut files,
-				tests,
-				capture,
-			},
-		} => {
-			append_includes(&mut files);
-			let args = compilation_args();
-			let tests = (!tests.is_empty()).then_some(tests);
-			watch::main(files.clone(), move || {
-				test::main(capture, files.clone(), args.clone(), tests.clone());
-			})
+			watch::main(files, command);
 		}
 
 		Commands::init { path } => config::create(path),

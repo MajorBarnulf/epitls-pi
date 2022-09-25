@@ -143,11 +143,31 @@ impl FormatTask {
 		command
 			.arg(self.file)
 			.arg(format!("-style={config}"))
-			.stdout(Stdio::null())
-			.stderr(Stdio::null());
+			.stdout(Stdio::piped())
+			.stderr(Stdio::piped());
 		command.status().unwrap();
 
 		let result = command.output().unwrap().stdout;
 		String::from_utf8(result).unwrap()
+	}
+}
+
+pub struct CmdTask {
+	command: String,
+}
+
+impl CmdTask {
+	pub fn new(command: String) -> Self {
+		Self { command }
+	}
+
+	pub fn run(self) -> Result<(), ()> {
+		Command::new("sh")
+			.arg("-c")
+			.arg(self.command)
+			.stdout(Stdio::inherit())
+			.output()
+			.map(|_| ())
+			.map_err(|_| ())
 	}
 }

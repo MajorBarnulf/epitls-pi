@@ -2,11 +2,29 @@ use std::fs;
 
 use termion::color;
 
-use crate::{tasks::FormatTask, utils::log_failure};
+use crate::{
+	tasks::FormatTask,
+	utils::{log_failure, log_process},
+};
 
 const FORMAT_CONFIG: &str = r#"{BasedOnStyle: llvm}"#;
 
 mod testables;
+
+pub fn main(files: Vec<String>) {
+	for file in files {
+		log_process(&format!("checking '{file}'"));
+		check_formatting(file.to_string());
+		let content = fs::read_to_string(&file).unwrap();
+		for test in testables::tests() {
+			if let Err(reason) = test.test(content.clone()) {
+				let name = test.name();
+				log_failure(&format!("'{file}': rule '{name}' fails:"));
+				println!("{reason}");
+			}
+		}
+	}
+}
 
 pub enum Diff {
 	ToRemove { index: usize, content: String },
@@ -14,62 +32,59 @@ pub enum Diff {
 	Keep { index: usize, content: String },
 }
 
-pub fn main(files: Vec<String>) {
-	for file in files {
-		let content = fs::read_to_string(&file).unwrap();
-		let formatted = FormatTask::new(file, FORMAT_CONFIG.into()).run();
-		let mut line_number = 0usize;
-		let mut invalid = false;
-		let differences = diff::lines(&content, &formatted)
-			.into_iter()
-			.map(|change| {
-				match change {
-					diff::Result::Left(_) | diff::Result::Both(_, _) => {
-						line_number += 1;
-					}
-					_ => (),
+fn check_formatting(file: String) {
+	let content = fs::read_to_string(&file).unwrap();
+	let formatted = FormatTask::new(file.clone(), FORMAT_CONFIG.into()).run();
+	let mut line_number = 0usize;
+	let mut invalid = false;
+	let differences = diff::lines(&content, &formatted)
+		.into_iter()
+		.map(|change| {
+			match change {
+				diff::Result::Left(_) | diff::Result::Both(_, _) => {
+					line_number += 1;
 				}
-				(line_number, change)
-			})
-			.map(|(index, d)| match d {
-				diff::Result::Left(content) => {
-					invalid = true;
-					Diff::ToRemove {
-						index,
-						content: content.into(),
-					}
-				}
-				diff::Result::Both(content, _) => Diff::Keep {
+				_ => (),
+			}
+			(line_number, change)
+		})
+		.map(|(index, d)| match d {
+			diff::Result::Left(content) => {
+				invalid = true;
+				Diff::ToRemove {
 					index,
 					content: content.into(),
-				},
-				diff::Result::Right(content) => {
-					invalid = true;
-					Diff::ToAdd {
-						index,
-						content: content.into(),
-					}
 				}
-			})
-			.collect::<Vec<_>>();
+			}
+			diff::Result::Both(content, _) => Diff::Keep {
+				index,
+				content: content.into(),
+			},
+			diff::Result::Right(content) => {
+				invalid = true;
+				Diff::ToAdd {
+					index,
+					content: content.into(),
+				}
+			}
+		})
+		.collect::<Vec<_>>();
+	if invalid {
+		log_failure(&format!("'{file}': invalid formatting:"));
+		let red = color::Fg(color::Red);
+		let green = color::Fg(color::Green);
+		let reset = color::Fg(color::Reset);
 
-		if invalid {
-			log_failure("invalid formatting:");
-			let red = color::Fg(color::Red);
-			let green = color::Fg(color::Green);
-			let reset = color::Fg(color::Reset);
-
-			for difference in differences {
-				match difference {
-					Diff::ToRemove { index, content } => {
-						println!("{red} {index} - | {content}{reset}")
-					}
-					Diff::ToAdd { index, content } => {
-						println!("{green} {index} + | {content}{reset}")
-					}
-					Diff::Keep { index, content } => {
-						println!(" {index}   | {content}")
-					}
+		for difference in differences {
+			match difference {
+				Diff::ToRemove { index, content } => {
+					println!("{red}{index:>3} -|{content}{reset}")
+				}
+				Diff::ToAdd { index, content } => {
+					println!("{green}{index:>3} +|{content}{reset}")
+				}
+				Diff::Keep { index, content } => {
+					println!("{index:>3}  |{content}")
 				}
 			}
 		}

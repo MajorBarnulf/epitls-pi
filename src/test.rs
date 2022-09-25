@@ -2,16 +2,11 @@ use std::{fs, thread, time::Duration};
 
 use crate::{
 	tasks::{CompileTask, GenTask, RunTask},
-	utils::{log_failure, log_process},
+	utils::{log_failure, log_process, log_success},
 };
 
 pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>, _test: Option<Vec<String>>) {
-	// let includes = files
-	//     .iter()
-	//     .cloned()
-	//     .map(|p| PathBuf::from_str(&p).unwrap())
-	//     .collect::<Vec<_>>();
-
+	log_process("running tests");
 	for path in files {
 		let content = fs::read_to_string(&path).unwrap();
 		let tests = find_tests(content);
@@ -35,6 +30,7 @@ pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>, _test: Option
 			}
 		}
 	}
+	log_success("finished");
 }
 
 pub fn find_tests(source: String) -> Vec<String> {
@@ -50,8 +46,11 @@ pub fn gen_test_main(path: &str, test: &str) -> String {
 		"
 void __pi_test();
 
-int main(int _argc, char** _argv) {{
-    __pi_test();
+int main(int argc, char** argv) {{
+	(void)argc;
+	(void)argv;
+    
+	__pi_test();
     return 0;
 }}
 

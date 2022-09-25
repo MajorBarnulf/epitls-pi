@@ -1,5 +1,7 @@
+use crate::utils::log_failure;
+
 fn ends_with_newline(source: String) -> Result<(), String> {
-	if !source.ends_with("\n") {
+	if !source.ends_with('\n') {
 		Err("source does not end with newline".into())
 	} else {
 		Ok(())
