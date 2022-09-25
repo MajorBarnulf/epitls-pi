@@ -18,9 +18,15 @@ pub struct Arguments {
 #[allow(non_camel_case_types)]
 #[derive(Subcommand)]
 pub enum Commands {
-	/// Checks a source file for conformance with piscine limitations.
+	/// Checks source files for conformance with piscine limitations.
 	check {
 		/// File to check.
+		files: Vec<String>,
+	},
+
+	/// Formats source files.
+	format {
+		/// Files to format.
 		files: Vec<String>,
 	},
 
@@ -82,6 +88,9 @@ fn main() {
 
 	match args.command {
 		Commands::check { files } => check::main(files),
+
+		Commands::format { files } => check::format(files),
+
 		Commands::run { mut files } => {
 			if files.is_empty() {
 				files.push(Config::get_current().main_file().to_string());
@@ -90,6 +99,7 @@ fn main() {
 			let args = compilation_args();
 			run::main(files, args);
 		}
+
 		Commands::test {
 			capture,
 			mut files,

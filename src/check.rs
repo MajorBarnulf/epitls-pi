@@ -4,7 +4,7 @@ use termion::color;
 
 use crate::{
 	tasks::FormatTask,
-	utils::{log_failure, log_process},
+	utils::{log_failure, log_process, log_success},
 };
 
 /// TODO: fill with appropriate rules
@@ -89,5 +89,16 @@ fn check_formatting(file: String) {
 				}
 			}
 		}
+	}
+}
+
+pub fn format(files: Vec<String>) {
+	for file in files {
+		let mut formatted = FormatTask::new(file.clone(), FORMAT_CONFIG.into()).run();
+		if !formatted.ends_with('\n') {
+			formatted += "\n";
+		}
+		fs::write(&file, formatted).unwrap();
+		log_success(&format!("formatted '{file}'"));
 	}
 }
