@@ -2,7 +2,7 @@
 name = "epitls-pi"
 version = "1.0.0"
 edition = "2021"
-license = "GPL3"
+license = "GPL"
 description = "A little helper tool meant to ease the developpment of the C piscine at EPITA/Toulouse."
 repository = "https://github.com/MajorBarnulf/epitls-pi"
 authors = ["JOLIMAITRE Matthieu <matthieu@imagevo.fr>"]
