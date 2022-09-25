@@ -14,6 +14,7 @@ pub struct Config {
 	main_file: String,
 	test_file: String,
 	includes: Vec<String>,
+	fascist_mode: bool,
 }
 
 impl Config {
@@ -24,6 +25,7 @@ impl Config {
 			main_file: "main.c".into(),
 			test_file: "test.c".into(),
 			includes: vec![],
+			fascist_mode: false,
 		}
 	}
 
@@ -59,6 +61,10 @@ impl Config {
 
 	pub fn includes(&self) -> &Vec<String> {
 		&self.includes
+	}
+
+	pub fn fascist_mode(&self) -> bool {
+		self.fascist_mode
 	}
 
 	fn try_get(path: &Path) -> Option<Self> {

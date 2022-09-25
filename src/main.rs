@@ -63,6 +63,18 @@ fn append_includes(list: &mut Vec<String>) {
 	);
 }
 
+fn compilation_args() -> Vec<String> {
+	let mut args = vec![
+		"-Wall".to_string(),
+		"-Wextra".to_string(),
+		"-std=c99".to_string(),
+	];
+	if Config::get_current().fascist_mode() {
+		args.push("-Werror".to_string());
+	}
+	args
+}
+
 fn main() {
 	let args: Arguments = Parser::parse();
 
@@ -70,7 +82,8 @@ fn main() {
 		Commands::check { files } => check::main(files),
 		Commands::run { mut files } => {
 			append_includes(&mut files);
-			run::main(files);
+			let args = compilation_args();
+			run::main(files, args);
 		}
 		Commands::test {
 			capture,
@@ -78,12 +91,14 @@ fn main() {
 			tests,
 		} => {
 			append_includes(&mut files);
+			let args = compilation_args();
 			let tests = (!tests.is_empty()).then_some(tests);
 			test::main(capture, files, tests)
 		}
 		Commands::watch { mut files } => {
 			append_includes(&mut files);
-			watch::main(files)
+			let args = compilation_args();
+			watch::main(files, args)
 		}
 		Commands::init { path } => config::create(path),
 	}

@@ -8,41 +8,28 @@ use crate::{
 };
 
 pub struct Repeater {
-	files: Vec<String>,
+	op: Box<dyn Fn()>,
 }
 
 impl Repeater {
-	pub fn new(files: Vec<String>) -> Self {
-		Self { files }
+	pub fn new(op: impl Fn() + 'static) -> Self {
+		let op = Box::new(op);
+		Self { op }
 	}
 
 	pub fn repeat(&self) -> Option<()> {
-		let binary = CompileTask::new(self.files.clone().into_iter().map(|f| f.into()).collect())
-			.run()
-			.map(Option::from)
-			.unwrap_or_else(|_| {
-				log_failure("failed compilation");
-				None
-			})?;
-
-		log_success("compilation successful");
-		RunTask::new(binary)
-			.run()
-			.map(Option::from)
-			.unwrap_or_else(|_| {
-				log_failure("task failure");
-				None
-			})?;
-
-		log_success("task successful");
-		log_process("waiting for changes before re run");
+		(self.op)();
+		log_process("waiting for changes...");
 		Some(())
 	}
 }
 
-pub fn main(files: Vec<String>) {
+pub fn main(files: Vec<String>, args: Vec<String>) {
 	log_process(&format!("watching files '{files:?}'"));
-	let repeater = Repeater::new(files.clone());
+	let passed = files.clone();
+	let repeater = Repeater::new(move || {
+		crate::run::main(passed.clone(), args.clone());
+	});
 	repeater.repeat();
 
 	let (send, rec) = mpsc::channel();

@@ -2,8 +2,6 @@ use std::{
 	fs,
 	path::PathBuf,
 	process::{Command, ExitStatus},
-	thread,
-	time::Duration,
 };
 
 use crate::utils::{
@@ -14,6 +12,7 @@ pub struct CompileTask {
 	files: Vec<PathBuf>,
 	addition: Vec<String>,
 	flags: Vec<String>,
+	verbose: bool,
 }
 
 // TODO: split compile & compile raw
@@ -24,6 +23,7 @@ impl CompileTask {
 			files,
 			addition: vec![],
 			flags: vec![],
+			verbose: false,
 		}
 	}
 
@@ -34,6 +34,11 @@ impl CompileTask {
 
 	pub fn with_flag(mut self, flag: impl ToString) -> Self {
 		self.flags.push(flag.to_string());
+		self
+	}
+
+	pub fn with_verbose(mut self) -> Self {
+		self.verbose = true;
 		self
 	}
 
@@ -60,30 +65,46 @@ impl CompileTask {
 			.args(["-o", output_path_ref])
 			.args(self.flags.clone())
 			.args(sources.iter().map(|s| s.to_str().unwrap()));
-		log_command_run(&command);
-		log_separator_top();
+		if self.verbose {
+			log_command_run(&command);
+			log_separator_top();
+		}
 		let status = command.status().unwrap();
-		log_separator_bottom();
-		thread::sleep(Duration::from_millis(100));
+		if self.verbose {
+			log_separator_bottom();
+		}
 		status.success().then_some(output_path).ok_or(status)
 	}
 }
 
 pub struct RunTask {
 	file: PathBuf,
+	verbose: bool,
 }
 
 impl RunTask {
 	pub fn new(file: PathBuf) -> Self {
-		Self { file }
+		Self {
+			file,
+			verbose: false,
+		}
+	}
+
+	pub fn with_verbose(mut self) -> Self {
+		self.verbose = true;
+		self
 	}
 
 	pub fn run(self) -> Result<(), ExitStatus> {
 		let mut command = Command::new(self.file);
-		log_command_run(&command);
-		log_separator_top();
+		if self.verbose {
+			log_command_run(&command);
+			log_separator_top();
+		}
 		let status = command.status().unwrap();
-		log_separator_bottom();
+		if self.verbose {
+			log_separator_bottom();
+		}
 		if status.success() {
 			Ok(())
 		} else {
@@ -100,10 +121,11 @@ impl GenTask {
 	pub fn new(content: String) -> Self {
 		Self { content }
 	}
+
 	pub fn run(self) -> PathBuf {
 		let output_path = tmp_file_path().apply(|o| o.set_extension("c"));
-		fs::write(&output_path, &self.content).unwrap();
-		dbg!(fs::read_to_string(&output_path).unwrap());
+		let content = self.content.clone();
+		fs::write(&output_path, &content).unwrap();
 		output_path
 	}
 }
