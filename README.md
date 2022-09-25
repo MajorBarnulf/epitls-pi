@@ -23,3 +23,8 @@ SUBCOMMANDS:
     test     Runs tests contained within a particular test file or the default test file
     watch    Watches changes to the project included files and runs a command on changes
 ```
+
+## Installation
+
+- through the AUR, as `epitls-pi-bin`
+- with cargo `cargo install epitls-pi`
