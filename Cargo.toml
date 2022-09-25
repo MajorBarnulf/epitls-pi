@@ -7,6 +7,7 @@ description = "A little helper tool meant to ease the developpment of the C pisc
 repository = "https://github.com/MajorBarnulf/epitls-pi"
 keywords = ["pi", "epita", "tls", "piscine"]
 authors = ["JOLIMAITRE Matthieu <matthieu@imagevo.fr>"]
+homepage = "https://github.com/MajorBarnulf/epitls-pi"
 
 [[bin]]
 name = "pi"
