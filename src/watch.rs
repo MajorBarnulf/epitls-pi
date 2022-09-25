@@ -24,12 +24,9 @@ impl Repeater {
 	}
 }
 
-pub fn main(files: Vec<String>, args: Vec<String>) {
+pub fn main(files: Vec<String>, op: impl Fn() + 'static) {
 	log_process(&format!("watching files '{files:?}'"));
-	let passed = files.clone();
-	let repeater = Repeater::new(move || {
-		crate::run::main(passed.clone(), args.clone());
-	});
+	let repeater = Repeater::new(op);
 	repeater.repeat();
 
 	let (send, rec) = mpsc::channel();

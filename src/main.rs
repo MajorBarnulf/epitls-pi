@@ -46,12 +46,36 @@ pub enum Commands {
 
 	/// Watches changes to source files and re run them
 	watch {
-		/// Files to run.
-		files: Vec<String>,
+		#[clap(subcommand)]
+		command: WatchSubcommand,
 	},
 
 	///
 	init { path: String },
+}
+
+#[allow(non_camel_case_types)]
+#[derive(Subcommand)]
+pub enum WatchSubcommand {
+	/// Runs a set of files or the default target.
+	run {
+		/// Files to run.
+		files: Vec<String>,
+	},
+
+	/// Runs tests contained within a particular test file or
+	test {
+		/// Wether to capture standard output or not.
+		#[clap(short, long)]
+		capture: bool,
+
+		/// Files to run tests from.
+		files: Vec<String>,
+
+		/// Specific tests to run.
+		#[clap(short, long)]
+		tests: Vec<String>,
+	},
 }
 
 fn append_includes(list: &mut Vec<String>) {
@@ -81,6 +105,9 @@ fn main() {
 	match args.command {
 		Commands::check { files } => check::main(files),
 		Commands::run { mut files } => {
+			if files.is_empty() {
+				files.push(Config::get_current().main_file().to_string());
+			}
 			append_includes(&mut files);
 			let args = compilation_args();
 			run::main(files, args);
@@ -95,11 +122,30 @@ fn main() {
 			let tests = (!tests.is_empty()).then_some(tests);
 			test::main(capture, files, tests)
 		}
-		Commands::watch { mut files } => {
+		Commands::watch {
+			command: WatchSubcommand::run { mut files },
+		} => {
 			append_includes(&mut files);
 			let args = compilation_args();
-			watch::main(files, args)
+			let files = files.clone();
+			watch::main(files, move || {
+				run::main(files.clone(), args.clone());
+			})
 		}
+		Commands::watch {
+			command: WatchSubcommand::test {
+				mut files,
+				tests,
+				capture,
+			},
+		} => {
+			append_includes(&mut files);
+			let args = compilation_args();
+			watch::main(files, move || {
+				run::main(files.clone(), args.clone());
+			})
+		}
+
 		Commands::init { path } => config::create(path),
 	}
 }
