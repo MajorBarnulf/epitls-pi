@@ -7,6 +7,8 @@ A little helper tool meant to ease the developpment of the C piscine at EPITA/To
 ## Usage
 
 ```sh
+epitls-pi 
+
 USAGE:
     pi <SUBCOMMAND>
 
@@ -16,7 +18,8 @@ OPTIONS:
 SUBCOMMANDS:
     check    Checks a source file for conformance with piscine limitations
     help     Print this message or the help of the given subcommand(s)
-    run      Runs a file
-    test     Runs tests contained within a particular test file or
-    watch    Watches changes to source files and re run them
+    init     
+    run      Runs a set of files or the default target
+    test     Runs tests contained within a particular test file or the default test file
+    watch    Watches changes to the project included files and runs a command on changes
 ```
