@@ -11,80 +11,80 @@ pub mod watch;
 
 #[derive(Parser)]
 pub struct Arguments {
-    #[clap(subcommand)]
-    command: Commands,
+	#[clap(subcommand)]
+	command: Commands,
 }
 
 #[allow(non_camel_case_types)]
 #[derive(Subcommand)]
 pub enum Commands {
-    /// Checks a source file for conformance with piscine limitations.
-    check {
-        /// File to check.
-        files: Vec<String>,
-    },
+	/// Checks a source file for conformance with piscine limitations.
+	check {
+		/// File to check.
+		files: Vec<String>,
+	},
 
-    /// Runs a set of files or the default target.
-    run {
-        /// Files to run.
-        files: Vec<String>,
-    },
+	/// Runs a set of files or the default target.
+	run {
+		/// Files to run.
+		files: Vec<String>,
+	},
 
-    /// Runs tests contained within a particular test file or
-    test {
-        /// Wether to capture standard output or not.
-        #[clap(short, long)]
-        capture: bool,
+	/// Runs tests contained within a particular test file or
+	test {
+		/// Wether to capture standard output or not.
+		#[clap(short, long)]
+		capture: bool,
 
-        /// Files to run tests from.
-        files: Vec<String>,
+		/// Files to run tests from.
+		files: Vec<String>,
 
-        /// Specific tests to run.
-        #[clap(short, long)]
-        tests: Vec<String>,
-    },
+		/// Specific tests to run.
+		#[clap(short, long)]
+		tests: Vec<String>,
+	},
 
-    /// Watches changes to source files and re run them
-    watch {
-        /// Files to run.
-        files: Vec<String>,
-    },
+	/// Watches changes to source files and re run them
+	watch {
+		/// Files to run.
+		files: Vec<String>,
+	},
 
-    ///
-    init { path: String },
+	///
+	init { path: String },
 }
 
 fn append_includes(list: &mut Vec<String>) {
-    list.extend(
-        Config::get_current()
-            .includes()
-            .iter()
-            .map(|f| f.to_string()),
-    );
+	list.extend(
+		Config::get_current()
+			.includes()
+			.iter()
+			.map(|f| f.to_string()),
+	);
 }
 
 fn main() {
-    let args: Arguments = Parser::parse();
+	let args: Arguments = Parser::parse();
 
-    match args.command {
-        Commands::check { files } => check::main(files),
-        Commands::run { mut files } => {
-            append_includes(&mut files);
-            run::main(files);
-        }
-        Commands::test {
-            capture,
-            mut files,
-            tests,
-        } => {
-            append_includes(&mut files);
-            let tests = (!tests.is_empty()).then_some(tests);
-            test::main(capture, files, tests)
-        }
-        Commands::watch { mut files } => {
-            append_includes(&mut files);
-            watch::main(files)
-        }
-        Commands::init { path } => config::create(path),
-    }
+	match args.command {
+		Commands::check { files } => check::main(files),
+		Commands::run { mut files } => {
+			append_includes(&mut files);
+			run::main(files);
+		}
+		Commands::test {
+			capture,
+			mut files,
+			tests,
+		} => {
+			append_includes(&mut files);
+			let tests = (!tests.is_empty()).then_some(tests);
+			test::main(capture, files, tests)
+		}
+		Commands::watch { mut files } => {
+			append_includes(&mut files);
+			watch::main(files)
+		}
+		Commands::init { path } => config::create(path),
+	}
 }
