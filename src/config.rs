@@ -10,22 +10,22 @@ use crate::utils::{log_success, Apply};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
-	name: String,
+	identifier: String,
 	main_file: String,
 	test_file: String,
 	includes: Vec<String>,
-	fascist_mode: bool,
+	strict_mode: bool,
 }
 
 impl Config {
 	const CONFIG_FILE_NAME: &'static str = "pi.ron";
-	pub fn new(name: String) -> Self {
+	pub fn new(identifier: String) -> Self {
 		Self {
-			name,
+			identifier,
 			main_file: "main.c".into(),
 			test_file: "test.c".into(),
 			includes: vec![],
-			fascist_mode: false,
+			strict_mode: false,
 		}
 	}
 
@@ -47,8 +47,8 @@ impl Config {
 		Self::try_get(&path).or_else(|| path.parent().and_then(Self::get))
 	}
 
-	pub fn name(&self) -> &str {
-		&self.name
+	pub fn identifier(&self) -> &str {
+		&self.identifier
 	}
 
 	pub fn main_file(&self) -> &str {
@@ -63,8 +63,8 @@ impl Config {
 		&self.includes
 	}
 
-	pub fn fascist_mode(&self) -> bool {
-		self.fascist_mode
+	pub fn strict_mode(&self) -> bool {
+		self.strict_mode
 	}
 
 	fn try_get(path: &Path) -> Option<Self> {
@@ -75,13 +75,12 @@ impl Config {
 	}
 }
 
-pub fn create(path: String) {
+pub fn create(path: String, identifier: String) {
 	let absolute = fs::canonicalize(&path).unwrap();
 	if !absolute.is_dir() {
 		panic!("not a directory");
 	}
-	let name = absolute.file_name().unwrap();
-	let config = Config::new(name.to_str().unwrap().to_string());
+	let config = Config::new(identifier);
 	config.write(absolute.clone());
 	let path = absolute
 		.apply(|p| p.push(Config::CONFIG_FILE_NAME))

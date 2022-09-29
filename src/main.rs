@@ -36,7 +36,7 @@ pub enum Commands {
 		files: Vec<String>,
 	},
 
-	/// Runs tests contained within a particular test file or the default test file
+	/// Runs tests contained within a particular test file or the default test file.
 	test {
 		/// Wether to capture standard output or not.
 		#[clap(short, long)]
@@ -50,7 +50,7 @@ pub enum Commands {
 		tests: Vec<String>,
 	},
 
-	/// Watches changes to the project included files and runs a command on changes
+	/// Watches changes to the project included files and runs a command on changes.
 	watch {
 		#[clap(short)]
 		files: Option<Vec<String>>,
@@ -58,8 +58,14 @@ pub enum Commands {
 		command: String,
 	},
 
-	/// Initializes a project directory configuration, useful for custom flags, includes and custop push messages
-	init { path: String },
+	/// Initializes a project directory configuration, useful for custom flags, includes and custop push messages.
+	init {
+		/// Path to the folder containing the project.
+		path: String,
+
+		/// Identifier for the automated tests.
+		identifier: String,
+	},
 
 	/// Pushes changes to the git server with a custom tag.
 	push,
@@ -80,7 +86,7 @@ fn compilation_args() -> Vec<String> {
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
 	];
-	if Config::get_current().fascist_mode() {
+	if Config::get_current().strict_mode() {
 		args.push("-Werror".to_string());
 	}
 	args
@@ -122,7 +128,9 @@ fn main() {
 			watch::main(files, command);
 		}
 
-		Commands::init { path } => config::create(path),
+		Commands::init { path, identifier } => {
+			config::create(path, identifier);
+		}
 
 		Commands::push => {
 			todo!();
