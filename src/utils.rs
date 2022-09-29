@@ -91,3 +91,9 @@ fn format_variable(input: &str) -> String {
 		color::Fg(color::Reset),
 	)
 }
+
+pub fn log_error(input: impl AsRef<str>) {
+	let input = input.as_ref();
+	log_pi_prefix();
+	println!("error: {input}");
+}
