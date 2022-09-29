@@ -36,7 +36,12 @@ impl Config {
 		fs::write(path, content).unwrap();
 	}
 
-	pub fn get_current() -> Self {
+	pub fn get_local() -> Option<Self> {
+		let path = env::current_dir().unwrap();
+		Self::get(&path)
+	}
+
+	pub fn get_local_or_default() -> Self {
 		let path = env::current_dir().unwrap();
 		Self::get(&path)
 			.unwrap_or_else(|| Self::new(path.file_name().unwrap().to_str().unwrap().to_string()))

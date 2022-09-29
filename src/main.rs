@@ -3,6 +3,7 @@ use config::Config;
 
 pub mod check;
 pub mod config;
+pub mod push;
 pub mod run;
 pub mod tasks;
 pub mod test;
@@ -68,12 +69,12 @@ pub enum Commands {
 	},
 
 	/// Pushes changes to the git server with a custom tag.
-	push,
+	push { message: Option<String> },
 }
 
 fn append_includes(list: &mut Vec<String>) {
 	list.extend(
-		Config::get_current()
+		Config::get_local_or_default()
 			.includes()
 			.iter()
 			.map(|f| f.to_string()),
@@ -86,7 +87,7 @@ fn compilation_args() -> Vec<String> {
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
 	];
-	if Config::get_current().strict_mode() {
+	if Config::get_local_or_default().strict_mode() {
 		args.push("-Werror".to_string());
 	}
 	args
@@ -102,7 +103,7 @@ fn main() {
 
 		Commands::run { mut files } => {
 			if files.is_empty() {
-				files.push(Config::get_current().main_file().to_string());
+				files.push(Config::get_local_or_default().main_file().to_string());
 			}
 			append_includes(&mut files);
 			let args = compilation_args();
@@ -115,7 +116,7 @@ fn main() {
 			tests,
 		} => {
 			if files.is_empty() {
-				files.push(Config::get_current().test_file().to_string());
+				files.push(Config::get_local_or_default().test_file().to_string());
 			}
 			append_includes(&mut files);
 			let args = compilation_args();
@@ -132,8 +133,8 @@ fn main() {
 			config::create(path, identifier);
 		}
 
-		Commands::push => {
-			todo!();
+		Commands::push { message } => {
+			push::main(message);
 		}
 	}
 }
