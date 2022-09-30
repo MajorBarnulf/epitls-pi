@@ -1,6 +1,6 @@
 [package]
 name = "epitls-pi"
-version = "1.2.0"
+version = "1.2.1"
 edition = "2021"
 license = "GPL-3.0+"
 description = "A little helper tool meant to ease the developpment of the C piscine at EPITA/Toulouse."
