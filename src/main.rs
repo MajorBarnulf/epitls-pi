@@ -89,6 +89,7 @@ fn compilation_args() -> Vec<String> {
 		"-Wall".to_string(),
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
+		"-pedantic".to_string(),
 	];
 	if Config::get_local_or_default().strict_mode() {
 		args.push("-Werror".to_string());
@@ -138,7 +139,8 @@ fn main() {
 		} => {
 			let path =
 				path.unwrap_or_else(|| env::current_dir().unwrap().to_str().unwrap().to_string());
-			config::create(path.clone(), prefix);
+			let prefix = prefix.trim().trim_end_matches('*');
+			config::create(path.clone(), prefix.to_string());
 			if tests {
 				config::create_test(path);
 			}

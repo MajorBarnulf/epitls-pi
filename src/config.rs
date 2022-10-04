@@ -1,12 +1,13 @@
 use std::{
 	env, fs,
+	io::stdin,
 	path::{Path, PathBuf},
 };
 
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{log_success, Apply};
+use crate::utils::{log_process, log_success, Apply};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -33,6 +34,11 @@ impl Config {
 		path.extend([Self::CONFIG_FILE_NAME]);
 		let content =
 			ron::ser::to_string_pretty(self, PrettyConfig::default().struct_names(true)).unwrap();
+		if path.exists() {
+			log_process("config already exists, overwrite it?");
+			let mut buff = String::new();
+			stdin().read_line(&mut buff).unwrap();
+		}
 		fs::write(path, content).unwrap();
 	}
 
