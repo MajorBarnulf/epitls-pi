@@ -7,15 +7,26 @@ use crate::{
 	utils::{log_error, log_process, log_success},
 };
 
+pub fn add() {
+	let path = Config::get_local_path().unwrap();
+	let path = path.parent().unwrap();
+	let path = path.to_str().unwrap();
+	Command::new("git")
+		.args(["add", path])
+		.status()
+		.unwrap()
+		.success()
+		.then_some(())
+		.unwrap_or_else(|| exit(1));
+}
+
 pub fn main(message: Option<String>) {
 	let message = message.unwrap_or_else(|| Utc::now().format("pi - %d/%m/%Y %H:%M").to_string());
 	let timestamp = Utc::now().timestamp();
 	let suffix = format!("pi-{timestamp}");
 	let tag = Config::get_local()
 		.unwrap_or_else(|| {
-			log_error(
-				"no config file found.\nPlease initialize with 'pi init <path> <identifier>'",
-			);
+			log_error("no config file found.\nPlease initialize with 'pi init <tag-prefix>'");
 			exit(1)
 		})
 		.identifier()

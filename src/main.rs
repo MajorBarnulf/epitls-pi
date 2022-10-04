@@ -1,3 +1,5 @@
+use std::env;
+
 use clap::{Parser, Subcommand};
 use config::Config;
 
@@ -45,10 +47,9 @@ pub enum Commands {
 
 		/// Files to run tests from.
 		files: Vec<String>,
-
-		/// Specific tests to run.
-		#[clap(short, long)]
-		tests: Vec<String>,
+		// /// Specific tests to run.
+		// #[clap(short, long)]
+		// tests: Vec<String>,
 	},
 
 	/// Watches changes to the project included files and runs a command on changes.
@@ -61,11 +62,13 @@ pub enum Commands {
 
 	/// Initializes a project directory configuration, useful for custom flags, includes and custop push messages.
 	init {
-		/// Path to the folder containing the project.
-		path: String,
-
 		/// Identifier for the automated tests.
-		identifier: String,
+		prefix: String,
+		/// Path to the folder containing the project.
+		path: Option<String>,
+		/// e
+		#[clap(short, long)]
+		tests: bool,
 	},
 
 	/// Pushes changes to the git server with a custom tag.
@@ -113,15 +116,14 @@ fn main() {
 		Commands::test {
 			capture,
 			mut files,
-			tests,
+			// tests,
 		} => {
 			if files.is_empty() {
 				files.push(Config::get_local_or_default().test_file().to_string());
 			}
 			append_includes(&mut files);
 			let args = compilation_args();
-			let tests = (!tests.is_empty()).then_some(tests);
-			test::main(capture, files, args, tests)
+			test::main(capture, files, args)
 		}
 		Commands::watch { command, files } => {
 			let mut files = files.unwrap_or_default();
@@ -129,8 +131,17 @@ fn main() {
 			watch::main(files, command);
 		}
 
-		Commands::init { path, identifier } => {
-			config::create(path, identifier);
+		Commands::init {
+			path,
+			prefix,
+			tests,
+		} => {
+			let path =
+				path.unwrap_or_else(|| env::current_dir().unwrap().to_str().unwrap().to_string());
+			config::create(path.clone(), prefix);
+			if tests {
+				config::create_test(path);
+			}
 		}
 
 		Commands::push { message } => {
