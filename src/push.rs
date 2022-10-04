@@ -23,7 +23,7 @@ pub fn add() {
 pub fn main(message: Option<String>) {
 	let message = message.unwrap_or_else(|| Utc::now().format("pi - %d/%m/%Y %H:%M").to_string());
 	let timestamp = Utc::now().timestamp();
-	let suffix = format!("pi-{timestamp}");
+	let suffix = format!("pi{timestamp}");
 	let tag = Config::get_local()
 		.unwrap_or_else(|| {
 			log_error("no config file found.\nPlease initialize with 'pi init <tag-prefix>'");
