@@ -89,7 +89,7 @@ fn compilation_args() -> Vec<String> {
 		"-Wall".to_string(),
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
-		"-pedantic".to_string(),
+		// "-pedantic".to_string(),
 	];
 	if Config::get_local_or_default().strict_mode() {
 		args.push("-Werror".to_string());
