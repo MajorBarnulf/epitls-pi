@@ -1,12 +1,13 @@
 use std::{
 	env, fs,
+	io::stdin,
 	path::{Path, PathBuf},
 };
 
 use ron::ser::PrettyConfig;
 use serde::{Deserialize, Serialize};
 
-use crate::utils::{log_success, Apply};
+use crate::utils::{log_process, log_success, Apply};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Config {
@@ -23,7 +24,7 @@ impl Config {
 		Self {
 			identifier,
 			main_file: "main.c".into(),
-			test_file: "test.c".into(),
+			test_file: "test.ctest".into(),
 			includes: vec![],
 			strict_mode: false,
 		}
@@ -33,6 +34,11 @@ impl Config {
 		path.extend([Self::CONFIG_FILE_NAME]);
 		let content =
 			ron::ser::to_string_pretty(self, PrettyConfig::default().struct_names(true)).unwrap();
+		if path.exists() {
+			log_process("config already exists, overwrite it?");
+			let mut buff = String::new();
+			stdin().read_line(&mut buff).unwrap();
+		}
 		fs::write(path, content).unwrap();
 	}
 
@@ -47,9 +53,19 @@ impl Config {
 			.unwrap_or_else(|| Self::new(path.file_name().unwrap().to_str().unwrap().to_string()))
 	}
 
+	pub fn get_local_path() -> Option<PathBuf> {
+		let path = env::current_dir().unwrap();
+		Self::get_path(&path)
+	}
+
 	pub fn get(path: &Path) -> Option<Self> {
 		let path = path.to_path_buf().canonicalize().unwrap();
 		Self::try_get(&path).or_else(|| path.parent().and_then(Self::get))
+	}
+
+	pub fn get_path(path: &Path) -> Option<PathBuf> {
+		let path = path.to_path_buf().canonicalize().unwrap();
+		Self::try_get_path(&path).or_else(|| path.parent().and_then(Self::get_path))
 	}
 
 	pub fn identifier(&self) -> &str {
@@ -78,6 +94,15 @@ impl Config {
 			.ok()
 			.and_then(|content| ron::from_str(&content).ok())
 	}
+
+	fn try_get_path(path: &Path) -> Option<PathBuf> {
+		let path = path.to_path_buf().apply(|p| p.push(Self::CONFIG_FILE_NAME));
+		fs::read_to_string(&path)
+			.ok()
+			.and_then(|content| ron::from_str::<Self>(&content).ok())
+			.is_some()
+			.then_some(path)
+	}
 }
 
 pub fn create(path: String, identifier: String) {
@@ -93,4 +118,18 @@ pub fn create(path: String, identifier: String) {
 		.unwrap()
 		.to_string();
 	log_success(&format!("created '{path}'"));
+}
+
+pub fn create_test(mut path: String) {
+	const DEFAULT_CONTENT: &str = r#"
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+
+void test_it_works() {
+	assert( (2 + 2) == (4) );
+}
+"#;
+	path += "/test.ctest";
+	fs::write(path, DEFAULT_CONTENT).unwrap();
 }

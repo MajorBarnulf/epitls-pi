@@ -5,7 +5,7 @@ use crate::{
 	utils::{log_failure, log_process, log_success},
 };
 
-pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>, _test: Option<Vec<String>>) {
+pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>) {
 	log_process("testing");
 	for path in files {
 		let content = fs::read_to_string(&path).unwrap();
