@@ -7,9 +7,7 @@ use crate::{
 	utils::{log_failure, log_process, log_success},
 };
 
-/// TODO: fill with appropriate rules
-const FORMAT_CONFIG: &str = r#"{BasedOnStyle: llvm}"#;
-
+mod formatting;
 mod testables;
 
 pub fn main(files: Vec<String>) {
@@ -35,7 +33,7 @@ pub enum Diff {
 
 fn check_formatting(file: String) {
 	let content = fs::read_to_string(&file).unwrap();
-	let formatted = FormatTask::new(file.clone(), FORMAT_CONFIG.into()).run();
+	let formatted = FormatTask::new(file.clone(), formatting::formatted_config()).run();
 	let mut line_number = 0usize;
 	let mut invalid = false;
 	let differences = diff::lines(&content, &formatted)
@@ -94,7 +92,7 @@ fn check_formatting(file: String) {
 
 pub fn format(files: Vec<String>) {
 	for file in files {
-		let mut formatted = FormatTask::new(file.clone(), FORMAT_CONFIG.into()).run();
+		let mut formatted = FormatTask::new(file.clone(), formatting::formatted_config()).run();
 		if !formatted.ends_with('\n') {
 			formatted += "\n";
 		}
