@@ -2,7 +2,7 @@
 
 ## Description
 
-A little helper tool meant to ease the developpment of the C piscine at
+A little helper tool meant to ease the developpment of the C homeworks at
 EPITA/Toulouse.
 
 ## Usage
@@ -19,7 +19,7 @@ OPTIONS:
 SUBCOMMANDS:
     check    Checks a source file for conformance with piscine limitations
     help     Print this message or the help of the given subcommand(s)
-    init     
+    init     Initializes a project directory configuration, useful for custom flags, includes and custop push messages
     run      Runs a set of files or the default target
     test     Runs tests contained within a particular test file or the default test file
     watch    Watches changes to the project included files and runs a command on changes
@@ -34,4 +34,6 @@ SUBCOMMANDS:
 
 - [ ] add support and switch on run/test for strict mode.
 - [ ] add `--` syntax to run subcommand for parameter piping.
+- [ ] flag on push to add automatically
 - [ ] prevent double includes.
+- [ ] flag on init to copy personnal environment
