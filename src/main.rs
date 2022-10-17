@@ -87,6 +87,7 @@ fn append_includes(list: &mut Vec<String>) {
 fn compilation_args() -> Vec<String> {
 	let mut args = vec![
 		"-Wall".to_string(),
+		"-fsanitize=address".to_string(),
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
 		"-g".to_string(),

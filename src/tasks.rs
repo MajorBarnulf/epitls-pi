@@ -1,11 +1,11 @@
 use std::{
 	fs,
 	path::PathBuf,
-	process::{Command, ExitStatus, Stdio},
+	process::{exit, Command, ExitStatus, Stdio},
 };
 
 use crate::utils::{
-	log_command_run, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
+	log_command_run, log_failure, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
 };
 
 pub struct CompileTask {
@@ -146,10 +146,20 @@ impl FormatTask {
 			.arg(format!("-style={config}"))
 			.stdout(Stdio::piped())
 			.stderr(Stdio::piped());
-		command.status().unwrap();
 
-		let result = command.output().unwrap().stdout;
-		String::from_utf8(result).unwrap()
+		let status = command.status().unwrap();
+		let out = command.output().unwrap().stdout;
+		let out = String::from_utf8(out).unwrap();
+		let err = command.output().unwrap().stderr;
+		let err = String::from_utf8(err).unwrap();
+		if !status.success() {
+			log_failure("failed formatting");
+			println!("{out}");
+			eprintln!("{err}");
+			exit(1);
+		}
+
+		out
 	}
 }
 
