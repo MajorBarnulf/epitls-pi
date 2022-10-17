@@ -2,7 +2,8 @@
 
 ## Description
 
-A little helper tool meant to ease the developpment of the C piscine at EPITA/Toulouse.
+A little helper tool meant to ease the developpment of the C piscine at
+EPITA/Toulouse.
 
 ## Usage
 
@@ -28,3 +29,9 @@ SUBCOMMANDS:
 
 - through the AUR, as `epitls-pi-bin`
 - with cargo `cargo install epitls-pi`
+
+## TODO
+
+- [ ] add support and switch on run/test for strict mode.
+- [ ] add `--` syntax to run subcommand for parameter piping.
+- [ ] prevent double includes.

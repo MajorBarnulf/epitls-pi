@@ -93,7 +93,8 @@ impl RunTask {
 	}
 
 	pub fn run(self) -> Result<(), ExitStatus> {
-		let mut command = Command::new(self.file);
+		let mut command = Command::new("sh");
+		command.args(["-c", self.file.to_str().unwrap()]);
 		if self.verbose {
 			log_command_run(&command);
 			log_separator_top();

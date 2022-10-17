@@ -89,6 +89,8 @@ fn compilation_args() -> Vec<String> {
 		"-Wall".to_string(),
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
+		"-g".to_string(),
+		"-fsanitize=address".to_string(),
 		// "-pedantic".to_string(),
 	];
 	if Config::get_local_or_default().strict_mode() {
