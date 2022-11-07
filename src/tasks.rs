@@ -5,7 +5,8 @@ use std::{
 };
 
 use crate::utils::{
-	log_command_run, log_failure, log_separator_bottom, log_separator_top, tmp_file_path, Apply,
+	log_command_run, log_failure, log_separator_bottom, log_separator_top, remove_dupes,
+	tmp_file_path, Apply,
 };
 
 pub struct CompileTask {
@@ -55,13 +56,18 @@ impl CompileTask {
 	}
 
 	pub fn compile(&self, sources: Vec<PathBuf>) -> Result<PathBuf, ExitStatus> {
+		let mut sources = sources
+			.iter()
+			.map(|s| s.to_str().unwrap().to_string())
+			.collect();
+		remove_dupes(&mut sources);
 		let output_path = tmp_file_path().apply(|o| o.set_extension("b"));
 		let output_path_ref = output_path.to_str().unwrap();
 		let mut command = Command::new("gcc");
 		command
 			.args(["-o", output_path_ref])
 			.args(self.flags.clone())
-			.args(sources.iter().map(|s| s.to_str().unwrap()));
+			.args(sources);
 		if self.verbose {
 			log_command_run(&command);
 			log_separator_top();
@@ -77,6 +83,7 @@ impl CompileTask {
 pub struct RunTask {
 	file: PathBuf,
 	verbose: bool,
+	args: Vec<String>,
 }
 
 impl RunTask {
@@ -84,7 +91,13 @@ impl RunTask {
 		Self {
 			file,
 			verbose: false,
+			args: vec![],
 		}
+	}
+
+	pub fn with_args(mut self, mut args: Vec<String>) -> Self {
+		self.args.append(&mut args);
+		self
 	}
 
 	pub fn with_verbose(mut self) -> Self {
@@ -93,8 +106,8 @@ impl RunTask {
 	}
 
 	pub fn run(self) -> Result<(), ExitStatus> {
-		let mut command = Command::new("sh");
-		command.args(["-c", self.file.to_str().unwrap()]);
+		let mut command = Command::new(self.file.to_str().unwrap());
+		command.args(self.args);
 		if self.verbose {
 			log_command_run(&command);
 			log_separator_top();

@@ -9,7 +9,7 @@ pub const FORMAT_CONFIG: &StaticConf = &[
 
 pub fn formatted_config() -> String {
 	let middle = FORMAT_CONFIG
-		.into_iter()
+		.iter()
 		.map(|(key, value)| format!("{key}: {value}"))
 		.collect::<Vec<_>>()
 		.join(", ");

@@ -63,6 +63,7 @@ impl Config {
 		Self::try_get(&path).or_else(|| path.parent().and_then(Self::get))
 	}
 
+	// get path of the current config file
 	pub fn get_path(path: &Path) -> Option<PathBuf> {
 		let path = path.to_path_buf().canonicalize().unwrap();
 		Self::try_get_path(&path).or_else(|| path.parent().and_then(Self::get_path))
@@ -72,16 +73,28 @@ impl Config {
 		&self.identifier
 	}
 
-	pub fn main_file(&self) -> &str {
-		&self.main_file
+	pub fn main_file(&self) -> String {
+		Self::try_absolute(self.main_file.clone())
 	}
 
-	pub fn test_file(&self) -> &str {
-		&self.test_file
+	pub fn test_file(&self) -> String {
+		Self::try_absolute(self.test_file.clone())
 	}
 
-	pub fn includes(&self) -> &Vec<String> {
-		&self.includes
+	fn try_absolute(path: String) -> String {
+		if let Some(conf_path) = Self::get_local_path() {
+			let dir_path = conf_path.parent().unwrap();
+			dir_path.join(path).to_str().unwrap().to_string()
+		} else {
+			path
+		}
+	}
+
+	pub fn includes(&self) -> Vec<String> {
+		self.includes
+			.iter()
+			.map(|p| Self::try_absolute(p.clone()))
+			.collect()
 	}
 
 	pub fn strict_mode(&self) -> bool {

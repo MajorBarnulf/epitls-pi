@@ -1,4 +1,4 @@
-use std::{fs, path::PathBuf, process::Command};
+use std::{collections::HashSet, fs, mem::swap, path::PathBuf, process::Command};
 
 use chrono::Utc;
 use termion::color;
@@ -96,4 +96,16 @@ pub fn log_error(input: impl AsRef<str>) {
 	let input = input.as_ref();
 	log_pi_prefix();
 	println!("error: {input}");
+}
+
+pub fn remove_dupes(input: &mut Vec<String>) {
+	let mut tmp = vec![];
+	swap(input, &mut tmp);
+	let mut set = HashSet::new();
+	for str in tmp {
+		set.insert(str);
+	}
+	for str in set {
+		input.push(str);
+	}
 }

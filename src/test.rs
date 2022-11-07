@@ -1,13 +1,14 @@
-use std::{fs, thread, time::Duration};
+use std::{fs, path::PathBuf, thread, time::Duration};
 
 use crate::{
 	tasks::{CompileTask, GenTask, RunTask},
 	utils::{log_failure, log_process, log_success},
 };
 
-pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>) {
+pub fn main(_capture: bool, test_files: Vec<String>, includes: Vec<String>, args: Vec<String>) {
 	log_process("testing");
-	for path in files {
+	let includes: Vec<_> = includes.into_iter().map(PathBuf::from).collect();
+	for path in test_files {
 		let content = fs::read_to_string(&path).unwrap();
 		let tests = find_tests(content);
 		for test in tests {
@@ -18,7 +19,10 @@ pub fn main(_capture: bool, files: Vec<String>, args: Vec<String>) {
 			thread::sleep(Duration::from_millis(100));
 
 			// compile with all files
-			let mut task = CompileTask::new(vec![generated_code]);
+			let mut files = vec![generated_code];
+			let mut local_includes = includes.clone();
+			files.append(&mut local_includes);
+			let mut task = CompileTask::new(files);
 			for flag in args.clone() {
 				task = task.with_flag(flag);
 			}

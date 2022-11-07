@@ -31,7 +31,7 @@ fn ends_with_newline(source: String) -> RuleResult {
 
 fn function_under_50l(source: String) -> RuleResult {
 	for character in source.chars() {
-		let c: char = character;
+		let _c: char = character;
 	}
 
 	Ok(())

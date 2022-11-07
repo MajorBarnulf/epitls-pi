@@ -33,7 +33,8 @@ SUBCOMMANDS:
 ## TODO
 
 - [ ] add support and switch on run/test for strict mode.
-- [ ] add `--` syntax to run subcommand for parameter piping.
+- [x] add `-p` flag to run subcommand with parameter piping.
 - [ ] flag on push to add automatically
 - [ ] prevent double includes.
 - [ ] flag on init to copy personnal environment
+- [ ] gc subcommand to free cache

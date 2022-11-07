@@ -35,8 +35,13 @@ pub enum Commands {
 
 	/// Runs a set of files or the default target.
 	run {
+		// disables fsanitize
+		#[clap(short, long)]
+		disable_sanitize: bool,
 		/// Files to run.
 		files: Vec<String>,
+		#[clap(short, long)]
+		pass: Vec<String>,
 	},
 
 	/// Runs tests contained within a particular test file or the default test file.
@@ -84,16 +89,17 @@ fn append_includes(list: &mut Vec<String>) {
 	);
 }
 
-fn compilation_args() -> Vec<String> {
+fn compilation_args(sanitize: bool) -> Vec<String> {
 	let mut args = vec![
 		"-Wall".to_string(),
-		"-fsanitize=address".to_string(),
 		"-Wextra".to_string(),
 		"-std=c99".to_string(),
 		"-g".to_string(),
-		"-fsanitize=address".to_string(),
-		// "-pedantic".to_string(),
+		"-pedantic".to_string(),
 	];
+	if sanitize {
+		args.push("-fsanitize=address".to_string())
+	}
 	if Config::get_local_or_default().strict_mode() {
 		args.push("-Werror".to_string());
 	}
@@ -108,13 +114,17 @@ fn main() {
 
 		Commands::format { files } => check::format(files),
 
-		Commands::run { mut files } => {
+		Commands::run {
+			disable_sanitize,
+			mut files,
+			pass,
+		} => {
 			if files.is_empty() {
-				files.push(Config::get_local_or_default().main_file().to_string());
+				files.push(Config::get_local_or_default().main_file());
 			}
 			append_includes(&mut files);
-			let args = compilation_args();
-			run::main(files, args);
+			let args = compilation_args(!disable_sanitize);
+			run::main(files, args, pass);
 		}
 
 		Commands::test {
@@ -123,11 +133,12 @@ fn main() {
 			// tests,
 		} => {
 			if files.is_empty() {
-				files.push(Config::get_local_or_default().test_file().to_string());
+				files.push(Config::get_local_or_default().test_file());
 			}
-			append_includes(&mut files);
-			let args = compilation_args();
-			test::main(capture, files, args)
+			let mut includes = vec![];
+			append_includes(&mut includes);
+			let args = compilation_args(true);
+			test::main(capture, files, includes, args)
 		}
 		Commands::watch { command, files } => {
 			let mut files = files.unwrap_or_default();
