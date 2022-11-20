@@ -42,9 +42,9 @@ impl CompileTask {
 	}
 
 	pub fn run(self) -> Result<PathBuf, ExitStatus> {
-		let proc_source = self.gen_source();
-		let mut sources = self.files.clone();
-		sources.push(proc_source);
+		// let proc_source = self.gen_source();
+		let sources = self.files.clone();
+		// sources.push(proc_source);
 		self.compile(sources)
 	}
 
