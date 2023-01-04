@@ -4,6 +4,8 @@ use std::{
 	process::{exit, Command, ExitStatus, Stdio},
 };
 
+use termion::color;
+
 use crate::utils::{
 	log_command_run, log_failure, log_separator_bottom, log_separator_top, remove_dupes,
 	tmp_file_path, Apply,
@@ -72,6 +74,11 @@ impl CompileTask {
 			log_command_run(&command);
 			log_separator_top();
 		}
+		println!(
+			"{}{command:?}{}",
+			color::Fg(color::AnsiValue(8)),
+			color::Fg(color::Reset)
+		);
 		let status = command.status().unwrap();
 		if self.verbose {
 			log_separator_bottom();
