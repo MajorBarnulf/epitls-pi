@@ -94,6 +94,16 @@ impl Config {
 		self.includes
 			.iter()
 			.map(|p| Self::try_absolute(p.clone()))
+			.flat_map(|p| {
+				if p.contains('*') {
+					glob::glob(&p)
+						.unwrap()
+						.map(|p| p.unwrap().to_str().unwrap().to_string())
+						.collect()
+				} else {
+					vec![p]
+				}
+			})
 			.collect()
 	}
 

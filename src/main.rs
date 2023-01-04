@@ -1,5 +1,3 @@
-use std::env;
-
 use clap::{Parser, Subcommand};
 use config::Config;
 
@@ -67,10 +65,10 @@ pub enum Commands {
 
 	/// Initializes a project directory configuration, useful for custom flags, includes and custop push messages.
 	init {
-		/// Identifier for the automated tests.
-		prefix: String,
 		/// Path to the folder containing the project.
-		path: Option<String>,
+		path: String,
+		/// Identifier for the automated tests.
+		prefix: Option<String>,
 		/// e
 		#[clap(short, long)]
 		tests: bool,
@@ -151,8 +149,7 @@ fn main() {
 			prefix,
 			tests,
 		} => {
-			let path =
-				path.unwrap_or_else(|| env::current_dir().unwrap().to_str().unwrap().to_string());
+			let prefix = prefix.unwrap_or_else(|| ".".to_string());
 			let prefix = prefix.trim().trim_end_matches('*');
 			config::create(path.clone(), prefix.to_string());
 			if tests {
