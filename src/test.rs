@@ -1,12 +1,14 @@
 use std::{fs, path::PathBuf, thread, time::Duration};
 
 use crate::{
+	config::Config,
 	tasks::{CompileTask, GenTask, RunTask},
 	utils::{log_failure, log_process, log_success},
 };
 
 pub fn main(_capture: bool, test_files: Vec<String>, includes: Vec<String>, args: Vec<String>) {
 	log_process("testing");
+	let main_file = Config::get_local_or_default().main_file();
 	let includes: Vec<_> = includes.into_iter().map(PathBuf::from).collect();
 	for path in test_files {
 		let content = fs::read_to_string(&path).unwrap();
@@ -20,7 +22,7 @@ pub fn main(_capture: bool, test_files: Vec<String>, includes: Vec<String>, args
 
 			// compile with all files
 			let mut files = vec![generated_code];
-			let mut local_includes = includes.clone();
+			let mut local_includes = includes.clone(); // TODO : filter out current test : already included
 			files.append(&mut local_includes);
 			let mut task = CompileTask::new(files);
 			for flag in args.clone() {
@@ -57,6 +59,8 @@ int main(int argc, char** argv) {{
 	__pi_test();
     return 0;
 }}
+
+#define main __pi_hidden_main
 
 #include \"{path}\"
 
