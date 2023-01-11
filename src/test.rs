@@ -1,14 +1,12 @@
 use std::{fs, path::PathBuf, thread, time::Duration};
 
 use crate::{
-	config::Config,
 	tasks::{CompileTask, GenTask, RunTask},
 	utils::{log_failure, log_process, log_success},
 };
 
 pub fn main(_capture: bool, test_files: Vec<String>, includes: Vec<String>, args: Vec<String>) {
 	log_process("testing");
-	let main_file = Config::get_local_or_default().main_file();
 	let includes: Vec<_> = includes.into_iter().map(PathBuf::from).collect();
 	for path in test_files {
 		let content = fs::read_to_string(&path).unwrap();
